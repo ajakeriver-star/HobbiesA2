@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EFL University Hobbies Hub (A2)</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            900: '#312e81',
+                        },
+                        accent: {
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* Word Search Grid Selection */
+        .ws-cell {
+            user-select: none;
+            touch-action: none;
+        }
+        .ws-cell.selected {
+            background-color: #818cf8;
+            color: white;
+            transform: scale(1.05);
+        }
+        .ws-cell.found {
+            background-color: #10b981;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
+
+    <!-- Top Header / Navigation -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <!-- Logo & Title -->
+                <div class="flex items-center space-x-3">
+                    <div class="bg-gradient-to-tr from-brand-600 to-indigo-500 text-white p-2.5 rounded-xl shadow-md">
+                        <i class="fa-solid fa-graduation-cap text-xl sm:text-2xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg sm:text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-brand-700 to-indigo-600">
+                            EFL Hobbies Hub
+                        </h1>
+                        <p class="text-xs text-slate-500 hidden sm:block">Level A2 • University Academic & Daily English</p>
+                    </div>
+                </div>
+
+                <!-- Gamification Points Counter -->
+                <div class="flex items-center space-x-4">
+                    <div class="bg-amber-50 border border-amber-200 text-amber-700 px-3 py-1.5 rounded-full flex items-center space-x-2 shadow-sm">
+                        <i class="fa-solid fa-trophy text-amber-500 text-lg"></i>
+                        <span class="font-bold text-sm sm:text-base" id="user-score">0</span>
+                        <span class="text-xs uppercase font-semibold tracking-wider text-amber-600">Pts</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-slate-100/80 backdrop-blur border-t border-slate-200 overflow-x-auto custom-scrollbar">
+            <div class="max-w-7xl mx-auto px-4 flex space-x-2 sm:space-x-4 py-2">
+                <button onclick="switchTab('glossary')" id="tab-btn-glossary" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 bg-brand-600 text-white shadow-sm">
+                    <i class="fa-solid fa-book-open"></i>
+                    <span>Interactive Glossary</span>
+                </button>
+                <button onclick="switchTab('hangman')" id="tab-btn-hangman" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 text-slate-600 hover:bg-slate-200">
+                    <i class="fa-solid fa-gamepad"></i>
+                    <span>Hangman</span>
+                </button>
+                <button onclick="switchTab('wordsearch')" id="tab-btn-wordsearch" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 text-slate-600 hover:bg-slate-200">
+                    <i class="fa-solid fa-border-all"></i>
+                    <span>Word Search</span>
+                </button>
+                <button onclick="switchTab('unscramble-words')" id="tab-btn-unscramble-words" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 text-slate-600 hover:bg-slate-200">
+                    <i class="fa-solid fa-font"></i>
+                    <span>Word Unscramble</span>
+                </button>
+                <button onclick="switchTab('unscramble-sentences')" id="tab-btn-unscramble-sentences" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 text-slate-600 hover:bg-slate-200">
+                    <i class="fa-solid fa-align-left"></i>
+                    <span>Sentence Builder</span>
+                </button>
+                <button onclick="switchTab('pbl')" id="tab-btn-pbl" class="nav-tab px-4 py-2 rounded-lg font-semibold text-sm transition-all duration-200 whitespace-nowrap flex items-center space-x-2 text-slate-600 hover:bg-slate-200">
+                    <i class="fa-solid fa-lightbulb"></i>
+                    <span>PBL & Roleplay</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+        <!-- Notification Toast -->
+        <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 bg-slate-900 text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 pointer-events-none">
+            <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400 text-lg"></i>
+            <span id="toast-message" class="text-sm font-medium">Notification message</span>
+        </div>
+
+        <!-- TAB 1: GLOSSARY -->
+        <section id="tab-glossary" class="tab-content space-y-6">
+            <!-- Search & Filter Controls -->
+            <div class="bg-white p-4 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row gap-4 justify-between items-center">
+                <div class="relative w-full md:w-96">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" id="glossary-search" placeholder="Search vocabulary or Spanish..." oninput="filterGlossary()" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-brand-500 focus:border-transparent text-sm">
+                </div>
+                <div class="flex flex-wrap gap-2 w-full md:w-auto justify-start md:justify-end" id="category-filters">
+                    <button onclick="filterCategory('All')" class="cat-filter bg-brand-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">All</button>
+                    <button onclick="filterCategory('Sports & Physical')" class="cat-filter bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">Sports</button>
+                    <button onclick="filterCategory('Creative & Artistic')" class="cat-filter bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">Creative</button>
+                    <button onclick="filterCategory('Tech & Digital')" class="cat-filter bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">Tech</button>
+                    <button onclick="filterCategory('Social & Relaxation')" class="cat-filter bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all">Social</button>
+                </div>
+            </div>
+
+            <!-- Glossary Cards Grid -->
+            <div id="glossary-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                <!-- JavaScript will populate cards here -->
+            </div>
+        </section>
+
+        <!-- TAB 2: HANGMAN GAME -->
+        <section id="tab-hangman" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Hangman Game (El Ahorcado)</h2>
+                    <p class="text-sm text-slate-500">Guess the hobby word one letter at a time!</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+                    <!-- SVG Visual Stage -->
+                    <div class="bg-slate-50 rounded-xl p-4 flex flex-col items-center justify-center border border-slate-100">
+                        <svg id="hangman-svg" class="w-48 h-56" viewBox="0 0 200 250">
+                            <!-- Gallows Structure -->
+                            <line x1="20" y1="230" x2="180" y2="230" stroke="#64748b" stroke-width="4"/>
+                            <line x1="60" y1="230" x2="60" y2="20" stroke="#64748b" stroke-width="4"/>
+                            <line x1="60" y1="20" x2="130" y2="20" stroke="#64748b" stroke-width="4"/>
+                            <line x1="130" y1="20" x2="130" y2="50" stroke="#64748b" stroke-width="3"/>
+                            
+                            <!-- Stickman Parts (hidden by default) -->
+                            <circle id="hm-head" cx="130" cy="70" r="20" stroke="#ef4444" stroke-width="3" fill="none" class="hidden"/>
+                            <line id="hm-body" x1="130" y1="90" x2="130" y2="150" stroke="#ef4444" stroke-width="3" class="hidden"/>
+                            <line id="hm-arm-l" x1="130" y1="110" x2="100" y2="130" stroke="#ef4444" stroke-width="3" class="hidden"/>
+                            <line id="hm-arm-r" x1="130" y1="110" x2="160" y2="130" stroke="#ef4444" stroke-width="3" class="hidden"/>
+                            <line id="hm-leg-l" x1="130" y1="150" x2="100" y2="190" stroke="#ef4444" stroke-width="3" class="hidden"/>
+                            <line id="hm-leg-r" x1="130" y1="150" x2="160" y2="190" stroke="#ef4444" stroke-width="3" class="hidden"/>
+                        </svg>
+                        <span id="hangman-attempts" class="mt-2 text-xs font-bold uppercase tracking-wider text-slate-500">
+                            Attempts left: <span class="text-rose-600 font-extrabold text-base">6</span>
+                        </span>
+                    </div>
+
+                    <!-- Gameplay Area -->
+                    <div class="space-y-6 text-center md:text-left">
+                        <div>
+                            <span id="hangman-category" class="inline-block bg-brand-50 text-brand-700 text-xs font-semibold px-2.5 py-1 rounded-md mb-2">Category</span>
+                            <div id="hangman-word-display" class="text-2xl sm:text-3xl font-mono tracking-widest text-slate-800 font-bold min-h-[40px]">
+                                _ _ _ _ _
+                            </div>
+                        </div>
+
+                        <!-- Hint Box -->
+                        <div class="bg-indigo-50/70 p-3.5 rounded-xl border border-indigo-100 text-xs sm:text-sm text-indigo-900">
+                            <span class="font-bold"><i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> Hint:</span>
+                            <span id="hangman-hint">Clue description goes here...</span>
+                        </div>
+
+                        <!-- Onscreen Keyboard -->
+                        <div id="hangman-keyboard" class="flex flex-wrap gap-1.5 justify-center md:justify-start">
+                            <!-- Generated by JS -->
+                        </div>
+
+                        <!-- Reset / Next Button -->
+                        <div class="pt-2">
+                            <button onclick="initHangman()" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold py-2.5 px-4 rounded-xl transition shadow-sm text-sm flex items-center justify-center space-x-2">
+                                <i class="fa-solid fa-rotate-right"></i>
+                                <span>Next Word</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: WORD SEARCH -->
+        <section id="tab-wordsearch" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-4xl mx-auto">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div>
+                        <h2 class="text-2xl font-bold text-slate-900">Word Search (Sopa de Letras)</h2>
+                        <p class="text-sm text-slate-500">Drag or click letters in a straight line to find the hidden hobbies!</p>
+                    </div>
+                    <button onclick="initWordSearch()" class="bg-brand-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-brand-700 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                        <span>New Puzzle</span>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-start">
+                    <!-- Word Grid -->
+                    <div class="md:col-span-2 overflow-x-auto flex justify-center">
+                        <div id="ws-grid" class="grid gap-1 bg-slate-200 p-2.5 rounded-2xl border border-slate-300">
+                            <!-- Generated JS Grid -->
+                        </div>
+                    </div>
+
+                    <!-- Target Word List -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 space-y-3">
+                        <h3 class="font-bold text-slate-800 text-sm uppercase tracking-wider">Words to find:</h3>
+                        <div id="ws-words-list" class="flex flex-wrap md:flex-col gap-2">
+                            <!-- Generated Words -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: WORD UNSCRAMBLE -->
+        <section id="tab-unscramble-words" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-2xl mx-auto">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Word Unscramble</h2>
+                    <p class="text-sm text-slate-500">Rearrange the letters to spell a correct hobby term!</p>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="bg-slate-50 p-6 rounded-2xl border border-slate-200 text-center">
+                        <span id="unscramble-category" class="text-xs uppercase font-bold text-brand-600 bg-brand-50 px-3 py-1 rounded-full">Category</span>
+                        <div id="scrambled-letters" class="text-3xl sm:text-4xl font-extrabold tracking-widest text-brand-700 my-4 font-mono">
+                            ---
+                        </div>
+                        <p id="unscramble-translation" class="text-sm text-slate-500 italic">Spanish: ...</p>
+                    </div>
+
+                    <!-- Input & Controls -->
+                    <div class="space-y-3">
+                        <input type="text" id="unscramble-input" placeholder="Type your answer here..." class="w-full text-center text-lg py-3 px-4 rounded-xl border border-slate-300 focus:outline-none focus:ring-2 focus:ring-brand-500 font-semibold uppercase tracking-wider" autocomplete="off">
+                        
+                        <div class="flex gap-3">
+                            <button onclick="checkWordUnscramble()" class="flex-1 bg-brand-600 text-white font-semibold py-3 rounded-xl hover:bg-brand-700 transition shadow-sm">
+                                Check Answer
+                            </button>
+                            <button onclick="initWordUnscramble()" class="bg-slate-100 text-slate-600 font-semibold px-4 rounded-xl hover:bg-slate-200 transition">
+                                Skip
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: SENTENCE UNSCRAMBLE -->
+        <section id="tab-unscramble-sentences" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 max-w-3xl mx-auto">
+                <div class="text-center mb-6">
+                    <h2 class="text-2xl font-bold text-slate-900">Sentence Unscramble</h2>
+                    <p class="text-sm text-slate-500">Click the word chips to build the sentence in the correct A2 English structure.</p>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Target Translation Guide -->
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 text-center">
+                        <span class="text-xs uppercase font-bold text-slate-400">Spanish Meaning</span>
+                        <p id="sentence-spanish" class="text-base font-semibold text-slate-800 mt-1">...</p>
+                    </div>
+
+                    <!-- Construction Drop Area -->
+                    <div class="min-h-[70px] p-4 bg-indigo-50/50 rounded-2xl border-2 border-dashed border-indigo-200 flex flex-wrap gap-2 items-center justify-center" id="sentence-target-area">
+                        <!-- Clicked words move here -->
+                    </div>
+
+                    <!-- Available Word Chips -->
+                    <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 flex flex-wrap gap-2 items-center justify-center" id="sentence-source-area">
+                        <!-- Scrambled word chips appear here -->
+                    </div>
+
+                    <!-- Actions -->
+                    <div class="flex gap-3">
+                        <button onclick="checkSentence()" class="flex-1 bg-brand-600 text-white font-semibold py-3 rounded-xl hover:bg-brand-700 transition shadow-sm">
+                            Check Sentence
+                        </button>
+                        <button onclick="resetSentence()" class="bg-slate-100 text-slate-600 font-semibold px-4 rounded-xl hover:bg-slate-200 transition">
+                            Reset
+                        </button>
+                        <button onclick="initSentenceUnscramble()" class="bg-slate-100 text-slate-600 font-semibold px-4 rounded-xl hover:bg-slate-200 transition">
+                            Next
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 6: ABP PROJECT & ROLEPLAY -->
+        <section id="tab-pbl" class="tab-content hidden space-y-8">
+            <!-- University ABP Projects Cards -->
+            <div>
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-slate-900">University ABP Project Ideas (Aprendizaje Basado en Proyectos)</h2>
+                    <p class="text-sm text-slate-500">Real-world collaborative projects for university EFL students.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Project 1 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-purple-50 text-purple-600 rounded-xl">
+                                <i class="fa-solid fa-bullhorn text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Project 1: University Club Fair Pitch</h3>
+                                <p class="text-xs text-slate-500">Final Deliverable: 3-Minute Video Pitch & Poster</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Students create a new university student club based on a shared hobby (e.g., Tech Club, Hiking Society, Digital Art Workshop).
+                        </p>
+                        <div class="border-t border-slate-100 pt-3 space-y-2 text-xs text-slate-700">
+                            <div class="font-semibold text-brand-600">Milestones:</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-500">
+                                <li><strong>Phase 1:</strong> Survey classmates about their free time hobbies.</li>
+                                <li><strong>Phase 2:</strong> Design the club name, mission statement, and weekly schedule.</li>
+                                <li><strong>Phase 3:</strong> Present the pitch to the class using A2 frequency adverbs and preference expressions.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- Project 2 -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                                <i class="fa-solid fa-podcast text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-slate-900">Project 2: Campus Life Podcast Episode</h3>
+                                <p class="text-xs text-slate-500">Final Deliverable: 4-Minute Audio Podcast</p>
+                            </div>
+                        </div>
+                        <p class="text-sm text-slate-600">
+                            Students record a friendly conversational podcast discussing how university students balance academic life with creative and physical hobbies.
+                        </p>
+                        <div class="border-t border-slate-100 pt-3 space-y-2 text-xs text-slate-700">
+                            <div class="font-semibold text-brand-600">Milestones:</div>
+                            <ul class="list-disc list-inside space-y-1 text-slate-500">
+                                <li><strong>Phase 1:</strong> Write an interview script with target vocabulary (e.g., <em>I'm really into...</em>).</li>
+                                <li><strong>Phase 2:</strong> Record audio with sound effects or background music.</li>
+                                <li><strong>Phase 3:</strong> Share audio in class and give feedback on peer balance tips.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Roleplay Interactive Prompt Generator -->
+            <div class="bg-gradient-to-r from-brand-900 to-indigo-900 text-white p-6 sm:p-8 rounded-2xl shadow-md space-y-6">
+                <div>
+                    <h2 class="text-2xl font-bold flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-amber-400"></i>
+                        <span>Interactive Speaking Roleplay Generator</span>
+                    </h2>
+                    <p class="text-sm text-indigo-200 mt-1">Generate dynamic prompts for pair-work speaking tasks in the classroom.</p>
+                </div>
+
+                <div class="bg-white/10 backdrop-blur border border-white/20 p-6 rounded-xl space-y-4">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                        <span class="text-xs font-bold uppercase tracking-wider text-amber-400" id="roleplay-context">Scenario Context</span>
+                        <span class="text-xs bg-white/20 px-2.5 py-1 rounded-md" id="roleplay-level">Level A2 Focus</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+                            <span class="font-bold text-sm text-indigo-300 block mb-1">Student A Role:</span>
+                            <p id="roleplay-student-a" class="text-sm text-slate-100">Click generate to get a prompt...</p>
+                        </div>
+
+                        <div class="bg-white/5 p-3 rounded-lg border border-white/10">
+                            <span class="font-bold text-sm text-indigo-300 block mb-1">Student B Role:</span>
+                            <p id="roleplay-student-b" class="text-sm text-slate-100">Click generate to get a prompt...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button onclick="generateRoleplay()" class="bg-amber-400 hover:bg-amber-300 text-slate-900 font-bold px-6 py-3 rounded-xl transition shadow-lg text-sm flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-dice"></i>
+                    <span>Generate New Speaking Prompt</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-6 mt-12 text-center text-xs text-slate-500">
+        <p>EFL University English Program • Designed for Level A2 (CEFR) by ABRAHAM RIVERA • Interactive Hobbies Vocabulary</p>
+    </footer>
+
+    <!-- JavaScript Data & Application Logic -->
+    <script>
+        // -------------------------------------------------------------
+        // DATA SETS (VOCABULARY, SENTENCES, PBL PROMPTS)
+        // -------------------------------------------------------------
+        const vocabularyData = [
+            // Sports & Physical
+            { word: "Basketball", verb: "Play", category: "Sports & Physical", es: "Baloncesto", def: "A game played between two teams of five players who score by tossing a ball through a netted hoop.", ex: "I play basketball with my campus team every Tuesday." },
+            { word: "Swimming", verb: "Go", category: "Sports & Physical", es: "Natación", def: "The sport or activity of propelling oneself through water using the limbs.", ex: "She goes swimming at the university pool." },
+            { word: "Cycling", verb: "Go", category: "Sports & Physical", es: "Ciclismo", def: "Riding a bicycle for transport, recreation, or sport.", ex: "We go cycling around the park on weekends." },
+            { word: "Yoga", verb: "Do", category: "Sports & Physical", es: "Yoga", def: "A Hindu spiritual and ascetic discipline including breath control and simple meditation.", ex: "He does yoga to reduce stress before exam week." },
+            { word: "Skateboarding", verb: "Go", category: "Sports & Physical", es: "Andar en patineta", def: "The action of riding on a skateboard.", ex: "Many students go skateboarding near the library." },
+            { word: "Hiking", verb: "Go", category: "Sports & Physical", es: "Senderismo / Excursión", def: "The activity of going for long walks, especially across country or mountains.", ex: "They love going hiking during the autumn holidays." },
+
+            // Creative & Artistic
+            { word: "Photography", verb: "Practice / Take", category: "Creative & Artistic", es: "Fotografía", def: "The art or practice of taking and processing photographs.", ex: "I am really into photography and taking portraits." },
+            { word: "Painting", verb: "Practice / Do", category: "Creative & Artistic", es: "Pintura", def: "The act of applying paint to a surface to create picture art.", ex: "She does acrylic painting in her free time." },
+            { word: "Guitar", verb: "Play", category: "Creative & Artistic", es: "Guitarra", def: "A stringed musical instrument played with fingers or a plectrum.", ex: "He plays acoustic guitar in a student band." },
+            { word: "Singing", verb: "Practice / Do", category: "Creative & Artistic", es: "Canto", def: "Making musical sounds with the voice.", ex: "She loves singing in the university choir." },
+            { word: "Journaling", verb: "Do", category: "Creative & Artistic", es: "Llevar un diario", def: "The practice of keeping a diary or journal for personal thoughts.", ex: "Journaling helps me organize my daily goals." },
+
+            // Tech & Digital
+            { word: "Gaming", verb: "Play / Do", category: "Tech & Digital", es: "Jugar videojuegos", def: "The action or practice of playing video games.", ex: "My friends and I enjoy online gaming after class." },
+            { word: "Podcasts", verb: "Listen to", category: "Tech & Digital", es: "Podcasts", def: "Digital audio files made available on the Internet for downloading.", ex: "I listen to English podcasts while commuting on the bus." },
+            { word: "Blogging", verb: "Do", category: "Tech & Digital", es: "Escribir en un blog", def: "Add new material to or manage a weblog (blog).", ex: "She writes a fashion blogging site on weekends." },
+            { word: "Editing", verb: "Do", category: "Tech & Digital", es: "Edición de video/fotos", def: "Preparing media content by correcting, condensing, or modifying.", ex: "He is good at video editing on his smartphone." },
+
+            // Social & Relaxation
+            { word: "Cooking", verb: "Do / Practice", category: "Social & Relaxation", es: "Cocinar", def: "The practice or skill of preparing food by combining and heating ingredients.", ex: "I enjoy cooking pasta meals for my roomates." },
+            { word: "Board games", verb: "Play", category: "Social & Relaxation", es: "Juegos de mesa", def: "Any game played on a board with counters or pieces.", ex: "We play board games on Friday evening." },
+            { word: "Gardening", verb: "Do", category: "Social & Relaxation", es: "Jardinería", def: "The activity of tending and cultivating a garden.", es: "My grandmother loves gardening on Sunday mornings." }
+        ];
+
+        const sentenceData = [
+            { en: "I love playing video games on weekends", es: "Me encanta jugar videojuegos los fines de semana." },
+            { en: "She is really into photography and art", es: "A ella le interesa mucho la fotografía y el arte." },
+            { en: "We go hiking in the mountains every summer", es: "Vamos de excursión a las montañas cada verano." },
+            { en: "He does yoga to stay calm during exams", es: "Él hace yoga para mantenerse en calma durante los exámenes." },
+            { en: "They prefer listening to podcasts while commuting", es: "Ellos prefieren escuchar podcasts mientras viajan en transporte." }
+        ];
+
+        const roleplayPrompts = [
+            {
+                context: "Campus Coffee Shop Chat",
+                a: "You meet a new classmate. Ask them about their favorite hobbies using expressions like 'What do you like doing in your free time?' or 'Are you into sports?'",
+                b: "Answer your classmate using target expressions (e.g., 'I'm really into...', 'I love playing...'). Invite them to join your hobby group this weekend."
+            },
+            {
+                context: "Joining a University Club",
+                a: "You are the leader of the University Outdoor Adventure Club. Explain what activities your club does (hiking, cycling, camping) and convince student B to join.",
+                b: "You are looking for new hobbies. Ask Student A about schedule, cost, and equipment needed. Decide if you want to sign up."
+            },
+            {
+                context: "Planning a Weekend Event",
+                a: "You want to organize a weekend hangout (gaming tournament or cooking dinner). Negotiate time and activities with Student B.",
+                b: "You prefer relaxing activities like reading or watching series. Propose a compromise that includes both your hobbies."
+            }
+        ];
+
+        // -------------------------------------------------------------
+        // APP STATE & GAMIFICATION
+        // -------------------------------------------------------------
+        let userPoints = 0;
+
+        function addPoints(pts) {
+            userPoints += pts;
+            document.getElementById('user-score').innerText = userPoints;
+            showToast(`+${pts} Points earned!`, 'fa-circle-check', 'text-emerald-400');
+        }
+
+        function showToast(msg, icon = 'fa-circle-check', iconColor = 'text-emerald-400') {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toast-message');
+            const toastIcon = document.getElementById('toast-icon');
+
+            toastMsg.innerText = msg;
+            toastIcon.className = `fa-solid ${icon} ${iconColor} text-lg`;
+
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-0', 'opacity-100');
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 2500);
+        }
+
+        // Speech Synthesis (TTS) Functionality
+        function speakWord(text) {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel(); // Stop current speech
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'en-US';
+                utterance.rate = 0.9; // Slightly slower for language learners
+                window.speechSynthesis.speak(utterance);
+            } else {
+                showToast("Text-to-speech not supported in this browser.", "fa-circle-exclamation", "text-amber-400");
+            }
+        }
+
+        // Navigation Tabs Controller
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.add('hidden'));
+            document.querySelectorAll('.nav-tab').forEach(btn => {
+                btn.classList.remove('bg-brand-600', 'text-white', 'shadow-sm');
+                btn.classList.add('text-slate-600', 'hover:bg-slate-200');
+            });
+
+            document.getElementById(`tab-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`tab-btn-${tabId}`);
+            activeBtn.classList.remove('text-slate-600', 'hover:bg-slate-200');
+            activeBtn.classList.add('bg-brand-600', 'text-white', 'shadow-sm');
+
+            // Tab initializations
+            if(tabId === 'hangman') initHangman();
+            if(tabId === 'wordsearch') initWordSearch();
+            if(tabId === 'unscramble-words') initWordUnscramble();
+            if(tabId === 'unscramble-sentences') initSentenceUnscramble();
+        }
+
+        // -------------------------------------------------------------
+        // TAB 1: GLOSSARY CONTROLLER
+        // -------------------------------------------------------------
+        let currentGlossaryCategory = 'All';
+
+        function renderGlossary() {
+            const grid = document.getElementById('glossary-grid');
+            const searchVal = document.getElementById('glossary-search').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = vocabularyData.filter(item => {
+                const matchesCategory = currentGlossaryCategory === 'All' || item.category === currentGlossaryCategory;
+                const matchesSearch = item.word.toLowerCase().includes(searchVal) || 
+                                      item.es.toLowerCase().includes(searchVal) ||
+                                      item.def.toLowerCase().includes(searchVal);
+                return matchesCategory && matchesSearch;
+            });
+
+            if(filtered.length === 0) {
+                grid.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400">No hobbies found matching your criteria.</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between hover:shadow-md transition-all";
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-xs font-bold uppercase tracking-wider text-brand-600 bg-brand-50 px-2.5 py-1 rounded-md">
+                                ${item.verb} +
+                            </span>
+                            <button onclick="speakWord('${item.word}')" class="text-slate-400 hover:text-brand-600 p-1.5 rounded-lg hover:bg-slate-100 transition" title="Listen Pronunciation">
+                                <i class="fa-solid fa-volume-high text-base"></i>
+                            </button>
+                        </div>
+                        <h3 class="text-lg font-bold text-slate-900">${item.word}</h3>
+                        <p class="text-xs font-semibold text-slate-500 mb-2">${item.es}</p>
+                        <p class="text-xs text-slate-600 mb-3">${item.def}</p>
+                    </div>
+                    <div class="bg-slate-50 p-3 rounded-xl border border-slate-100 mt-2">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Example:</span>
+                        <p class="text-xs text-slate-700 italic">"${item.ex}"</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterCategory(cat) {
+            currentGlossaryCategory = cat;
+            document.querySelectorAll('.cat-filter').forEach(btn => {
+                if(btn.innerText.includes(cat) || (cat === 'Sports & Physical' && btn.innerText.includes('Sports')) || (cat === 'Creative & Artistic' && btn.innerText.includes('Creative')) || (cat === 'Tech & Digital' && btn.innerText.includes('Tech')) || (cat === 'Social & Relaxation' && btn.innerText.includes('Social'))) {
+                    btn.className = "cat-filter bg-brand-600 text-white px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all";
+                } else {
+                    btn.className = "cat-filter bg-slate-100 text-slate-600 hover:bg-slate-200 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all";
+                }
+            });
+            renderGlossary();
+        }
+
+        function filterGlossary() {
+            renderGlossary();
+        }
+
+        // -------------------------------------------------------------
+        // TAB 2: HANGMAN GAME CONTROLLER
+        // -------------------------------------------------------------
+        let hangmanCurrentObj = null;
+        let hangmanGuessedLetters = [];
+        let hangmanWrongCount = 0;
+        const hangmanMaxWrong = 6;
+
+        function initHangman() {
+            hangmanCurrentObj = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+            hangmanGuessedLetters = [];
+            hangmanWrongCount = 0;
+
+            document.getElementById('hangman-category').innerText = hangmanCurrentObj.category;
+            document.getElementById('hangman-hint').innerText = `${hangmanCurrentObj.def} (Spanish: ${hangmanCurrentObj.es})`;
+            
+            // Reset SVG stickman
+            const parts = ['hm-head', 'hm-body', 'hm-arm-l', 'hm-arm-r', 'hm-leg-l', 'hm-leg-r'];
+            parts.forEach(p => document.getElementById(p).classList.add('hidden'));
+
+            renderHangmanDisplay();
+            renderHangmanKeyboard();
+        }
+
+        function renderHangmanDisplay() {
+            const word = hangmanCurrentObj.word.toUpperCase();
+            let display = '';
+            let isComplete = true;
+
+            for (let char of word) {
+                if (char === ' ') {
+                    display += '&nbsp;&nbsp;';
+                } else if (hangmanGuessedLetters.includes(char)) {
+                    display += `${char} `;
+                } else {
+                    display += '_ ';
+                    isComplete = false;
+                }
+            }
+
+            document.getElementById('hangman-word-display').innerHTML = display;
+            document.getElementById('hangman-attempts').querySelector('span').innerText = hangmanMaxWrong - hangmanWrongCount;
+
+            if (isComplete) {
+                addPoints(15);
+                showToast(`Awesome! You guessed: ${hangmanCurrentObj.word}`, 'fa-trophy', 'text-amber-400');
+                disableHangmanKeyboard();
+            }
+        }
+
+        function renderHangmanKeyboard() {
+            const kb = document.getElementById('hangman-keyboard');
+            kb.innerHTML = '';
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split('');
+
+            alphabet.forEach(letter => {
+                const btn = document.createElement('button');
+                btn.innerText = letter;
+                btn.className = "w-8 h-9 sm:w-9 sm:h-10 bg-slate-100 hover:bg-brand-100 text-slate-800 font-bold rounded-lg text-xs sm:text-sm transition flex items-center justify-center border border-slate-200";
+                btn.onclick = () => handleHangmanGuess(letter, btn);
+                kb.appendChild(btn);
+            });
+        }
+
+        function handleHangmanGuess(letter, btnElement) {
+            btnElement.disabled = true;
+            hangmanGuessedLetters.push(letter);
+
+            const word = hangmanCurrentObj.word.toUpperCase();
+            if (word.includes(letter)) {
+                btnElement.className = "w-8 h-9 sm:w-9 sm:h-10 bg-emerald-500 text-white font-bold rounded-lg text-xs sm:text-sm cursor-default";
+            } else {
+                btnElement.className = "w-8 h-9 sm:w-9 sm:h-10 bg-rose-100 text-rose-400 font-bold rounded-lg text-xs sm:text-sm cursor-default";
+                hangmanWrongCount++;
+                updateHangmanSVG();
+            }
+
+            renderHangmanDisplay();
+
+            if (hangmanWrongCount >= hangmanMaxWrong) {
+                document.getElementById('hangman-word-display').innerText = word;
+                showToast("Game Over! Try the next word.", "fa-circle-xmark", "text-rose-400");
+                disableHangmanKeyboard();
+            }
+        }
+
+        function updateHangmanSVG() {
+            const parts = ['hm-head', 'hm-body', 'hm-arm-l', 'hm-arm-r', 'hm-leg-l', 'hm-leg-r'];
+            if(hangmanWrongCount <= parts.length) {
+                document.getElementById(parts[hangmanWrongCount - 1]).classList.remove('hidden');
+            }
+        }
+
+        function disableHangmanKeyboard() {
+            document.querySelectorAll('#hangman-keyboard button').forEach(b => b.disabled = true);
+        }
+
+        // -------------------------------------------------------------
+        // TAB 3: WORD SEARCH CONTROLLER
+        // -------------------------------------------------------------
+        const wsGridSize = 10;
+        let wsGrid = [];
+        let wsTargetWords = [];
+        let wsFoundWords = [];
+        let wsSelectedCells = [];
+
+        function initWordSearch() {
+            // Select 4 random short words
+            const filteredWords = vocabularyData
+                .map(v => v.word.replace(/\s+/g, '').toUpperCase())
+                .filter(w => w.length <= wsGridSize)
+                .sort(() => 0.5 - Math.random())
+                .slice(0, 5);
+
+            wsTargetWords = filteredWords;
+            wsFoundWords = [];
+            wsSelectedCells = [];
+
+            generateWSGrid();
+            renderWSWordsList();
+        }
+
+        function generateWSGrid() {
+            // Create empty grid
+            wsGrid = Array(wsGridSize).fill(null).map(() => Array(wsGridSize).fill(''));
+
+            // Place words
+            wsTargetWords.forEach(word => {
+                let placed = false;
+                let attempts = 0;
+                while (!placed && attempts < 100) {
+                    attempts++;
+                    const direction = Math.floor(Math.random() * 2); // 0: horizontal, 1: vertical
+                    const row = Math.floor(Math.random() * (direction === 1 ? wsGridSize - word.length : wsGridSize));
+                    const col = Math.floor(Math.random() * (direction === 0 ? wsGridSize - word.length : wsGridSize));
+
+                    let canPlace = true;
+                    for (let i = 0; i < word.length; i++) {
+                        const r = direction === 1 ? row + i : row;
+                        const c = direction === 0 ? col + i : col;
+                        if (wsGrid[r][c] !== '' && wsGrid[r][c] !== word[i]) {
+                            canPlace = false;
+                            break;
+                        }
+                    }
+
+                    if (canPlace) {
+                        for (let i = 0; i < word.length; i++) {
+                            const r = direction === 1 ? row + i : row;
+                            const c = direction === 0 ? col + i : col;
+                            wsGrid[r][c] = word[i];
+                        }
+                        placed = true;
+                    }
+                }
+            });
+
+            // Fill empty cells
+            const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            for (let r = 0; r < wsGridSize; r++) {
+                for (let c = 0; c < wsGridSize; c++) {
+                    if (wsGrid[r][c] === '') {
+                        wsGrid[r][c] = letters[Math.floor(Math.random() * letters.length)];
+                    }
+                }
+            }
+
+            renderWSGrid();
+        }
+
+        function renderWSGrid() {
+            const gridEl = document.getElementById('ws-grid');
+            gridEl.style.gridTemplateColumns = `repeat(${wsGridSize}, minmax(0, 1fr))`;
+            gridEl.innerHTML = '';
+
+            for (let r = 0; r < wsGridSize; r++) {
+                for (let c = 0; c < wsGridSize; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = "ws-cell w-7 h-7 sm:w-9 sm:h-9 bg-white border border-slate-200 rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm text-slate-700 cursor-pointer hover:bg-indigo-50 transition";
+                    cell.innerText = wsGrid[r][c];
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+                    cell.onclick = () => toggleWSCell(cell, r, c);
+                    gridEl.appendChild(cell);
+                }
+            }
+        }
+
+        function toggleWSCell(cell, r, c) {
+            const index = wsSelectedCells.findIndex(item => item.r === r && item.c === c);
+            if (index >= 0) {
+                wsSelectedCells.splice(index, 1);
+                cell.classList.remove('selected');
+            } else {
+                wsSelectedCells.push({ r, c, letter: wsGrid[r][c], el: cell });
+                cell.classList.add('selected');
+            }
+
+            checkWSSelection();
+        }
+
+        function checkWSSelection() {
+            const currentString = wsSelectedCells.map(c => c.letter).join('');
+            const reversedString = currentString.split('').reverse().join('');
+
+            wsTargetWords.forEach(word => {
+                if ((currentString === word || reversedString === word) && !wsFoundWords.includes(word)) {
+                    wsFoundWords.push(word);
+                    wsSelectedCells.forEach(item => {
+                        item.el.classList.remove('selected');
+                        item.el.classList.add('found');
+                    });
+                    wsSelectedCells = [];
+                    addPoints(20);
+                    showToast(`Word Found: ${word}!`, 'fa-circle-check', 'text-emerald-400');
+                    renderWSWordsList();
+                }
+            });
+        }
+
+        function renderWSWordsList() {
+            const listEl = document.getElementById('ws-words-list');
+            listEl.innerHTML = '';
+
+            wsTargetWords.forEach(word => {
+                const isFound = wsFoundWords.includes(word);
+                const item = document.createElement('div');
+                item.className = `px-3 py-1.5 rounded-lg text-xs font-bold flex items-center justify-between border ${isFound ? 'bg-emerald-50 text-emerald-700 border-emerald-200 line-through' : 'bg-white text-slate-700 border-slate-200'}`;
+                item.innerHTML = `
+                    <span>${word}</span>
+                    ${isFound ? '<i class="fa-solid fa-check text-emerald-600 ml-2"></i>' : ''}
+                `;
+                listEl.appendChild(item);
+            });
+        }
+
+        // -------------------------------------------------------------
+        // TAB 4: WORD UNSCRAMBLE CONTROLLER
+        // -------------------------------------------------------------
+        let unscrambleObj = null;
+
+        function initWordUnscramble() {
+            unscrambleObj = vocabularyData[Math.floor(Math.random() * vocabularyData.length)];
+            const word = unscrambleObj.word.toUpperCase().replace(/\s+/g, '');
+            
+            // Scramble algorithm
+            let scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+            while(scrambled === word && word.length > 2) {
+                scrambled = word.split('').sort(() => Math.random() - 0.5).join('');
+            }
+
+            document.getElementById('unscramble-category').innerText = unscrambleObj.category;
+            document.getElementById('scrambled-letters').innerText = scrambled;
+            document.getElementById('unscramble-translation').innerText = `Spanish: "${unscrambleObj.es}"`;
+            document.getElementById('unscramble-input').value = '';
+        }
+
+        function checkWordUnscramble() {
+            const userAns = document.getElementById('unscramble-input').value.trim().toUpperCase().replace(/\s+/g, '');
+            const target = unscrambleObj.word.toUpperCase().replace(/\s+/g, '');
+
+            if (userAns === target) {
+                addPoints(10);
+                showToast("Correct word!", "fa-circle-check", "text-emerald-400");
+                initWordUnscramble();
+            } else {
+                showToast("Incorrect, try again!", "fa-circle-xmark", "text-rose-400");
+            }
+        }
+
+        // -------------------------------------------------------------
+        // TAB 5: SENTENCE UNSCRAMBLE CONTROLLER
+        // -------------------------------------------------------------
+        let currentSentenceObj = null;
+        let selectedSentenceWords = [];
+
+        function initSentenceUnscramble() {
+            currentSentenceObj = sentenceData[Math.floor(Math.random() * sentenceData.length)];
+            selectedSentenceWords = [];
+
+            document.getElementById('sentence-spanish').innerText = `"${currentSentenceObj.es}"`;
+
+            // Prepare Scrambled Words
+            const words = currentSentenceObj.en.split(' ');
+            const scrambled = [...words].sort(() => Math.random() - 0.5);
+
+            renderSentenceAreas(scrambled, []);
+        }
+
+        function renderSentenceAreas(sourceWords, targetWords) {
+            const targetArea = document.getElementById('sentence-target-area');
+            const sourceArea = document.getElementById('sentence-source-area');
+
+            targetArea.innerHTML = '';
+            sourceArea.innerHTML = '';
+
+            targetWords.forEach((w, index) => {
+                const chip = createWordChip(w, () => {
+                    // Move back to source
+                    targetWords.splice(index, 1);
+                    sourceWords.push(w);
+                    renderSentenceAreas(sourceWords, targetWords);
+                }, "bg-brand-600 text-white");
+                targetArea.appendChild(chip);
+            });
+
+            sourceWords.forEach((w, index) => {
+                const chip = createWordChip(w, () => {
+                    // Move to target
+                    sourceWords.splice(index, 1);
+                    targetWords.push(w);
+                    renderSentenceAreas(sourceWords, targetWords);
+                }, "bg-white text-slate-800 border border-slate-200 hover:bg-slate-100");
+                sourceArea.appendChild(chip);
+            });
+
+            selectedSentenceWords = targetWords;
+        }
+
+        function createWordChip(text, onClick, classes) {
+            const btn = document.createElement('button');
+            btn.className = `px-3.5 py-2 rounded-xl text-sm font-semibold shadow-sm transition transform active:scale-95 ${classes}`;
+            btn.innerText = text;
+            btn.onclick = onClick;
+            return btn;
+        }
+
+        function resetSentence() {
+            if(currentSentenceObj) {
+                const words = currentSentenceObj.en.split(' ');
+                const scrambled = [...words].sort(() => Math.random() - 0.5);
+                renderSentenceAreas(scrambled, []);
+            }
+        }
+
+        function checkSentence() {
+            const userSentence = selectedSentenceWords.join(' ');
+            if (userSentence === currentSentenceObj.en) {
+                addPoints(25);
+                showToast("Perfect sentence structure!", "fa-trophy", "text-amber-400");
+                initSentenceUnscramble();
+            } else {
+                showToast("Sentence is not quite right yet. Try again!", "fa-circle-xmark", "text-rose-400");
+            }
+        }
+
+        // -------------------------------------------------------------
+        // TAB 6: PBL ROLEPLAY GENERATOR CONTROLLER
+        // -------------------------------------------------------------
+        function generateRoleplay() {
+            const prompt = roleplayPrompts[Math.floor(Math.random() * roleplayPrompts.length)];
+            document.getElementById('roleplay-context').innerText = prompt.context;
+            document.getElementById('roleplay-student-a').innerText = prompt.a;
+            document.getElementById('roleplay-student-b').innerText = prompt.b;
+            showToast("New Roleplay Prompt Loaded!", "fa-comments", "text-amber-400");
+        }
+
+        // Initial Load Event
+        window.onload = function() {
+            renderGlossary();
+            generateRoleplay();
+        }
+    </script>
+</body>
+</html>
